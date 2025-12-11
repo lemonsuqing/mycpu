@@ -1,4 +1,5 @@
-// rtl/imem.sv (修正版)
+// rtl/imem.sv - 指令存储器 (Instruction Memory)
+
 /* verilator lint_off UNUSED */
 `define IMEM_DEPTH 256 // 存储 256 个 32 位字
 
@@ -9,21 +10,22 @@ module imem (
 
     logic [31:0] imem_arr [`IMEM_DEPTH]; 
 
-    // 初始化存储器 (内容不变)
+    // 初始化存储器：使用正确的 ADDI 和 ADD 机器码
     initial begin
-        imem_arr[0] = 32'h00A02083; // addi x1, x0, 10
-        imem_arr[1] = 32'h01402103; // addi x2, x0, 20
-        imem_arr[2] = 32'h002081B3; // add x3, x1, x2
-        imem_arr[3] = 32'h00000013; // NOP
-    end
+        // addr=0x00: addi x1, x0, 10  (Opcode: 7'b0010011)
+        imem_arr[0] = 32'h00A02093; 
 
-    // [!!!修正 1 - 解决 WIDTH 警告!!!]
-    // 数组索引只需要 8 位，因此我们只取 addr_i[9:2] 作为索引
-    // addr_i[9:2] 对应着 IMEM_DEPTH=256 的 1024 字节地址空间
+        // addr=0x04: addi x2, x0, 20  (Opcode: 7'b0010011)
+        imem_arr[1] = 32'h01402113;
+
+        // addr=0x08: add x3, x1, x2  (Opcode: 7'b0110011)
+        imem_arr[2] = 32'h002081B3; 
+        
+        // addr=0x0C: NOP (addi x0, x0, 0)
+        imem_arr[3] = 32'h00000013; 
+    end
     
-    // [!!!修正 2 - 解决 UNUSED 警告!!!]
-    // 使用 Verilator 的编译指示来忽略对 addr_i[1:0] 的警告
-    
+    // 组合逻辑：根据地址读取指令
     assign instr_o = imem_arr[addr_i[9:2]]; 
     
 

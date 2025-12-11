@@ -1,3 +1,5 @@
+# Makefile (修正版：增加 -I$(RTL_DIR))
+
 # --- 配置区域 ---
 # 顶层模块名
 TOP_MODULE = core_top
@@ -13,8 +15,9 @@ TB_SRCS  = $(TB_DIR)/sim_main.cpp
 
 # Verilator 编译参数
 # -j 4: 使用 4 线程编译
-# --trace: 开启波形追踪 (为下一章做准备)
-V_FLAGS  = --cc --exe --build -j 4 -Wall --top-module $(TOP_MODULE)
+# --trace: 开启波形追踪 
+# -I$(RTL_DIR): 【修正】添加 RTL 目录为 include 搜索路径
+V_FLAGS  = --cc --exe --build -j 4 -Wall --top-module $(TOP_MODULE) -I$(RTL_DIR)
 
 # --- 规则区域 ---
 
@@ -33,6 +36,6 @@ run: build
 
 # 清理步骤
 clean:
-	rm -rf $(OBJ_DIR)
+	rm -rf $(OBJ_dir)
 
 .PHONY: all build run clean
